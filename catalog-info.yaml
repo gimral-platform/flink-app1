@@ -1,7 +1,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: Flink App 1
+  name: flnk-app-1
   description: Flink Test application
   labels:
     component: Flink
