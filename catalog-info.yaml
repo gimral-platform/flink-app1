@@ -1,0 +1,16 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: Flink App 1
+  description: Flink Test application
+  labels:
+    component: Flink
+spec:
+  type: library
+  lifecycle: production
+  owner: FMS
+  system: FMS
+  # dependsOn:
+  #   - resource:default/artists-db
+  # providesApis:
+  #   - artist-api
