@@ -8,15 +8,13 @@ metadata:
 spec:
   type: library
   lifecycle: production
-  owner: fms
-  system: fms
+  owner: guests
+  system: examples
   # dependsOn:
   #   - resource:default/artists-db
-  # providesApis:
-  #   - artist-api
-
+  providesApis:
+    - flink-app-1-events
 ---
-
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
@@ -28,40 +26,72 @@ spec:
   owner: fms
   system: fms
   definition: |
-  asyncapi: 3.0.0
-  info:
-    title: Flink App 1
-    version: '1.0.0'
-    description: |
-      Flink Test application
-  servers:
-    mosquitto:
-      host: test.mosquitto.org
-      protocol: mqtt
-  channels:
-    lightMeasured:
-      address: 'light/measured'
+    asyncapi: 3.0.0
+    info:
+      title: Flink App 1
+      version: 1.0.0
+      description: |-
+        Flink Test application
+    #Convert to reference '#/servers/kafka-dev'
+    servers:
+      kafka-dev:
+        host: kafka-dev
+        protocol: kafka
+    channels:
+      customer-address-updated:
+        address: 'customer-updated'
+        messages:
+          customerAddressUpdated:
+            $ref: '#/components/messages/customerAddressUpdated'
+        # Convert to reference '#/bindings/customerUpdated'
+        bindings:
+          kafka:
+            topic: 'customer-updated'
+            partitions: 3
+            replicas: 3
+            topicConfiguration:
+              cleanup.policy: ["delete", "compact"]
+              retention.ms: 604800000
+              retention.bytes: 1000000000
+              delete.retention.ms: 86400000
+              max.message.bytes: 1048588
+            bindingVersion: '0.5.0'
+        tags:
+          - name: customer
+          - name: address
+    operations:
+      onCustomerAddressUpdate:
+        action: 'send'
+        summary: Send customer updates
+        channel:
+          $ref: '#/channels/customer-address-updated'
+        # traits:
+        #   $ref: "#/components/operationTraits/kafka"
+    components:
       messages:
-        lightMeasuredMessage:
-          name: LightMeasured
+        customerAddressUpdated:
+          name: CustomerAddressUpdated
+          contentType: application/json
           payload:
-            type: object
-            properties:
-              id:
-                type: integer
-                minimum: 0
-                description: ID of the streetlight.
-              lumens:
-                type: integer
-                minimum: 0
-                description: Light intensity measured in lumens.
-              sentAt:
-                type: string
-                format: date-time
-                description: Date and time when the message was sent.
-  operations:
-    onLightMeasured:
-      action: 'receive'
-      summary: Information about environmental lighting conditions for a particular streetlight.
-      channel:
-        $ref: '#/channels/lightMeasured'
+            $ref: '#/components/schemas/customerAddressUpdatedPayload'
+          examples:
+            - name: CustomerAddressUpdated
+              summary: A simple CustomerAddressUpdated example message
+              payload:
+                id: 0
+                name: 'Customer A'
+                updatedOn: 182831283218
+      schemas:
+        customerAddressUpdatedPayload:
+          type: object
+          properties:
+            id:
+              type: integer
+              minimum: 0
+              description: ID of customer
+            name:
+              type: string
+              description: Name of the customer.
+            updatedOn:
+              type: number
+              description: Epoch of when the update happened.
