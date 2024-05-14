@@ -1,0 +1,69 @@
+asyncapi: 3.0.0
+info:
+  title: Customer Events
+  version: 1.0.0
+  description: |-
+    Flink Test application
+#Convert to reference '#/servers/kafka-dev'
+servers:
+  kafka-dev:
+    host: kafka-dev
+    protocol: kafka
+channels:
+  customer-address-updated:
+    address: 'customer-updated'
+    messages:
+      customerAddressUpdated:
+        $ref: '#/components/messages/customerAddressUpdated'
+    # Convert to reference '#/bindings/customerUpdated'
+    bindings:
+      kafka:
+        topic: 'customer-updated'
+        partitions: 3
+        replicas: 3
+        topicConfiguration:
+          cleanup.policy: ["delete", "compact"]
+          retention.ms: 604800000
+          retention.bytes: 1000000000
+          delete.retention.ms: 86400000
+          max.message.bytes: 1048588
+        bindingVersion: '0.5.0'
+    tags:
+      - name: customer
+      - name: address
+operations:
+  onCustomerAddressUpdate:
+    action: 'send'
+    summary: Send customer updates
+    channel:
+      $ref: '#/channels/customer-address-updated'
+    # traits:
+    #   $ref: "#/components/operationTraits/kafka"
+components:
+  messages:
+    customerAddressUpdated:
+      name: CustomerAddressUpdated
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/customerAddressUpdatedPayload'
+      examples:
+        - name: CustomerAddressUpdated
+          summary: A simple CustomerAddressUpdated example message
+          payload:
+            id: 0
+            name: 'Customer A'
+            updatedOn: 182831283218
+  schemas:
+    customerAddressUpdatedPayload:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 0
+          description: ID of customer
+        name:
+          type: string
+          description: Name of the customer.
+        updatedOn:
+          type: number
+          description: Epoch of when the update happened.

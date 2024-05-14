@@ -1,0 +1,30 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: flink-app-1
+  description: Flink Test application
+  # labels:
+  #   component: flink
+spec:
+  type: flink-job
+  lifecycle: production
+  owner: guests
+  system: examples
+  # dependsOn:
+  #   - resource:default/service-a
+  providesApis:
+    - customer-events
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: customer-events
+  description: Events API for Customer
+spec:
+  type: asyncapi
+  lifecycle: production
+  owner: guests
+  system: examples
+  definition:
+    $asyncapi: ./spec/customer-events.yaml
