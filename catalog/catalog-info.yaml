@@ -7,7 +7,7 @@ metadata:
   # labels:
   #   component: flink
 spec:
-  type: flink-job
+  type: service
   lifecycle: production
   owner: guests
   system: examples
